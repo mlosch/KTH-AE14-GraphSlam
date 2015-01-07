@@ -1,0 +1,10 @@
+- Data association
+	- variable measurement noise dependent on distance
+	- incorporate noise in distance to hessian plane (howto?)
+	- accumulate subset of measurements until update? (e.g. 5 measurements per update)
+- Update step
+	- see graph slam tutorial
+- Graph optimization (howto?)
+	- matching for loop closure necessary?
+		- match planes?
+		- match raw measurements?
