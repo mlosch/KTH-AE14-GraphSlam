@@ -10,8 +10,8 @@ FRAME_LENGTH = 2.0;
 %% Init
 disp('Reading poses and ir data');
 maze_data=readmatrixtable('data/dats/maze.dat');
-poses = maze_data.delta_pose(274:274+100,:);
-irs = maze_data.ir(274:274+100,:);
+poses = maze_data.delta_pose(274:274+100,:)';
+irs = maze_data.ir(274:274+100,:)';
 
 disp('Instantiating Transform class');
 TF = Transform('data/tf.dat');

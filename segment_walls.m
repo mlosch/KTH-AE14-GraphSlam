@@ -42,7 +42,7 @@ while i < N
     for k=i:i+dn
         
         pose = pose + poses(:,k);
-        ir_points = TF.transform_to_map(TF, pose, irs(:,k));
+        ir_points = TF.transform_to_map(pose, irs(:,k));
         points(:, j:(j+nIR)) = ir_points(:,ir_i:6);
         
         j = j+nIR;
