@@ -59,6 +59,15 @@ classdef Transform
             points = points(1:2,:);
         end
         
+		function points = transform_to_map_multiple(TF, poses, ir_distances)
+			t = size(poses,1);
+			points = zeros(2, t*6);
+			for i = 1:t
+				some_points = TF.transform_to_map(poses(i,:), ir_distances(i,:));
+				points(:, i*6-5:i*6) = some_points;
+			end
+		end
+		
     end
     
 end
