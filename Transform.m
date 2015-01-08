@@ -23,8 +23,8 @@ classdef Transform
             TF.tomap_irs = zeros(n,3,3);
             
             for i=1:n
-                R = rotate2d(data.y(i,3));
-                TF.tomap_irs(i,:,:) = [R, data.x(i,1:2)'; [0 0 1]];
+                R = rotate2d(data.rpy(i,3));
+                TF.tomap_irs(i,:,:) = [R, data.xyz(i,1:2)'; [0 0 1]];
             end
         end
         
@@ -41,22 +41,24 @@ classdef Transform
             points(TF.left_rear,2)      = dists(TF.left_rear);
             points(TF.right_front,2)    = -dists(TF.right_front);
             points(TF.right_rear,2)     = -dists(TF.right_rear);
+            points = points';
         end
         
         function points = transform_to_map(TF, pose, ir_distances)
             points_ir = irs_to_points(TF,ir_distances);
             
             n = size(TF.tomap_irs,1);
-            points = zeros(n,3);
+            points = zeros(3,n);
             
             poseTF = pose_to_transform_mat(TF, pose);
             
             for i=1:size(TF.tomap_irs,1)
-                points(i,:) = poseTF * reshape(TF.tomap_irs(i,:,:),3,3) * points_ir(i,:)';
+                points(:,i) = poseTF * reshape(TF.tomap_irs(i,:,:),3,3) * points_ir(:,i);
             end
             
-            points = points(:,1:2);
+            points = points(1:2,:);
         end
+        
     end
     
 end
