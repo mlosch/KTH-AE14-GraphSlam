@@ -1,4 +1,4 @@
-function [ theta,rho,inliers ] = ransac( pts,indices,iterNum,thDist,thInlrRatio )
+function [ theta,rho,inliers ] = ransac( pts,indices,iterNum,thDist,thInlr )
 %RANSAC Use RANdom SAmple Consensus to fit a line
 %	RESCOEF = RANSAC(PTS,ITERNUM,THDIST,THINLRRATIO) PTS is 2*n matrix including 
 %	n points, ITERNUM is the number of iteration, THDIST is the inlier 
@@ -8,7 +8,7 @@ function [ theta,rho,inliers ] = ransac( pts,indices,iterNum,thDist,thInlrRatio 
 
 sampleNum = 2;
 ptNum = length(indices);
-thInlr = round(thInlrRatio*ptNum);
+%thInlr = round(thInlrRatio*ptNum);
 inlrNum = zeros(1,iterNum);
 theta1 = zeros(1,iterNum);
 rho1 = zeros(1,iterNum);
@@ -16,6 +16,8 @@ rho1 = zeros(1,iterNum);
 pts_fltrd = pts(:,indices);
 
 maxInlrNum = 0;
+
+inliers = [];
 
 for p = 1:iterNum
 	% 1. fit using 2 random points
@@ -29,14 +31,17 @@ for p = 1:iterNum
 	dist1 = n*(pts_fltrd-repmat(ptSample(:,1),1,ptNum));
 	inlier1 = find(abs(dist1) < thDist);
 	inlrNum(p) = length(inlier1);
-	if length(inlier1) < thInlr && inlrNum(p) <= maxInlrNum, continue; end
+	if length(inlier1) < thInlr || inlrNum(p) <= maxInlrNum, continue; end
 	maxInlrNum = inlrNum(p);
     ev = princomp(pts_fltrd(:,inlier1)');
 	d1 = ev(:,1);
 	theta1(p) = -atan2(d1(2),d1(1)); % save the coefs
-	rho1(p) = [-d1(2),d1(1)]*mean(pts(:,inlier1),2);
+	rho1(p) = [-d1(2),d1(1)]*mean(pts_fltrd(:,inlier1),2);
     
     inliers = indices(inlier1); % save the inliers
+    if (length(inliers) ~= length(inlier1))
+        disp('Huh2');
+    end
     
 end
 

@@ -25,7 +25,7 @@ correspondences = zeros(6,N);
 
 wallid = 1;
 
-points = TF.transform_to_map_multiple(poses, irs);
+points = TF.transform_to_map(poses, irs);
 
 i = 1;
 while i < N && (i+dn) <= N
@@ -49,24 +49,24 @@ while i < N && (i+dn) <= N
     
     while( nInliers/nPoints < HALT_CONDITION )
         
-        [t, r, inliers] = ransac(points, indices, RANSAC_ITERATIONS, MAX_DIST_TO_HYPOTHESIS, MIN_NUM_OF_INLIERS/nPoints);
+        [t, r, inliers] = ransac(points, indices, RANSAC_ITERATIONS, MAX_DIST_TO_HYPOTHESIS, MIN_NUM_OF_INLIERS);
         
         if (isempty(inliers))
-            disp('Could not fit more lines into point set');
+            %disp('Could not fit more lines into point set');
             break;
         end
         
-        plot(points(1,:),points(2,:),'ko');
-        hold on;
-        plot(points(1,indices),points(2,indices),'go');
-        plot(points(1,inliers),points(2,inliers),'ro');
-%         X = 0:0.1:2;%-N/20:N/20;
-%         k1 = -tan(t);
-%         b1 = r/cos(t);
-%         plot(X,k1*X+b1,'r');
+%         plot(points(1,:),points(2,:),'ko');
+%         hold on;
+%         plot(points(1,indices),points(2,indices),'go');
+%         plot(points(1,inliers),points(2,inliers),'ro');
+% %         X = 0:0.1:2;%-N/20:N/20;
+% %         k1 = -tan(t);
+% %         b1 = r/cos(t);
+% %         plot(X,k1*X+b1,'r');
 %         axis equal;
-        hold off;
-        pause;
+%         hold off;
+%         pause;
         
         nInliers = nInliers + length(inliers);
         
