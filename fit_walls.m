@@ -1,8 +1,8 @@
 % Fits all the walls given by the poses, their ir measurements, and the
 % ir measurement's assigned wall IDs (correspondences)
 %
-% Input:        poses               tx3
-%               ir                  tx6
+% Input:        poses               3xt
+%               ir                  6xt
 %               correspondences     6xt         The ir measurements assigned wall IDs
 %               tf                  Transform   For transforming ir distances to world space
 %
@@ -12,7 +12,7 @@
 
 
 function walls = fit_walls(poses, ir, correspondences, tf)
-	t = size(poses, 1);
+	t = size(poses, 2);
 	
 	wallc = max(max(correspondences));
 	walls = zeros(5, wallc);
