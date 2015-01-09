@@ -33,10 +33,10 @@ for p = 1:iterNum
 	inlrNum(p) = length(inlier1);
 	if length(inlier1) < thInlr || inlrNum(p) <= maxInlrNum, continue; end
 	maxInlrNum = inlrNum(p);
-    ev = princomp(pts_fltrd(:,inlier1)');
-	d1 = ev(:,1);
-	theta1(p) = -atan2(d1(2),d1(1)); % save the coefs
-	rho1(p) = [-d1(2),d1(1)]*mean(pts_fltrd(:,inlier1),2);
+    %ev = princomp(pts_fltrd(:,inlier1)');
+	%d1 = ev(:,1);
+	%theta1(p) = -atan2(d1(2),d1(1)); % save the coefs
+	%rho1(p) = [-d1(2),d1(1)]*mean(pts_fltrd(:,inlier1),2);
     
     inliers = indices(inlier1); % save the inliers
     if (length(inliers) ~= length(inlier1))
