@@ -3,7 +3,7 @@
 indir="bags/"
 outdir="dats/"
 
-mkdir -p outdir
+mkdir -p $outdir
 
 for f in $indir*.bag
 do

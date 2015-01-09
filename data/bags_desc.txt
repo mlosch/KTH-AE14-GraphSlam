@@ -1,0 +1,16 @@
+ ________
+|TL_   TR|
+| | | -| |
+|______| |
+|BL____BR|
+
+1. Quick run (forward) (start: bottom-left)
+2. Slow mostly with executor (forward) (start: top-left)
+3. Slow and wobbly withouth executor (forward) (start: top-left)
+4. Slow (backwards) (start: bottom-left)
+5. Slow with crashes (forward) (start: top-right) (2-laps)
+
+new bag
+1. Carrying (~40 sec, and then spinning)
+2. Björn, round and round things
+3. Max, ~realistic

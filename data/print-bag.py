@@ -28,20 +28,16 @@ if len(sys.argv) < 2:
 
 
 
-print 'delta_pose,ir'
+print 'pose,ir'
 
-pose = (0,0,0)
-prev_pose = False
+pose = False
 
 bag = rosbag.Bag(sys.argv[1])
 for topic, msg, t in bag.read_messages(topics=['/sensors/pose', '/sensors/ir/distances']):
 	if topic == '/sensors/pose':
 		pose = msg2pose(msg)
-		if prev_pose == False:
-			prev_pose = pose
 	elif topic == '/sensors/ir/distances':
-		pose_delta = posediff(pose,prev_pose);
-		dist = msg2dist(msg)
-		print '[%9.6f %9.6f %9.6f],\t[%6.3f %6.3f %6.3f %6.3f %6.3f %6.3f]' % (pose_delta + dist)
-		prev_pose = pose
+		if pose != False:
+			dist = msg2dist(msg)
+			print '[%9.6f %9.6f %9.6f],\t[%6.3f %6.3f %6.3f %6.3f %6.3f %6.3f]' % (pose + dist)
 bag.close()
