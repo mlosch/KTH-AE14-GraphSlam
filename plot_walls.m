@@ -18,7 +18,7 @@ function plot_walls(poses, ir, correspondences, tf)
 	clf
 	hold on
 
-	ir_points = tf.transform_to_map_multiple(poses, ir);
+	ir_points = tf.transform_to_map(poses, ir);
 	walls = fit_walls(poses, ir, correspondences, tf);
 	
 	%ir

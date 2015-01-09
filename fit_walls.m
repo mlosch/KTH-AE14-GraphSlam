@@ -17,7 +17,7 @@ function walls = fit_walls(poses, ir, correspondences, tf)
 	wallc = max(max(correspondences));
 	walls = zeros(5, wallc);
 	
-	ir_points = tf.transform_to_map_multiple(poses, ir);
+	ir_points = tf.transform_to_map(poses, ir);
 	for i = 1:wallc
 		corresponding_points = ir_points(:, correspondences == i);
 		
