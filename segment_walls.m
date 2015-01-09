@@ -15,64 +15,70 @@ end
 global HALT_CONDITION;
 global MAX_DIST_TO_HYPOTHESIS;
 global MIN_NUM_OF_INLIERS;
+global RANSAC_ITERATIONS;
 
 dt = 0.1; % Time between two consecutive (pose,measurement)
 dn = framelen / dt; % poses per frame
 N = size(poses,2);
 
-correspondences = -ones(6,N);
-
-if (skipFrontRearIR == 1)
-    nIR = 4;
-    ir_i = 3;
-else
-    nIR = 6;
-    ir_i = 1;
-end
+correspondences = zeros(6,N);
 
 wallid = 1;
 
-pose = poses(:,1);
+points = TF.transform_to_map_multiple(poses, irs);
 
 i = 1;
-while i < N
+while i < N && (i+dn) <= N
     
-    points = zeros(2, nIR*dn);
-    j = 1;
-    for k=i:i+dn
-        
-        pose = pose + poses(:,k);
-        ir_points = TF.transform_to_map(pose, irs(:,k));
-        points(:, j:(j+nIR)) = ir_points(:,ir_i:6);
-        
-        j = j+nIR;
+    %gather valid measurements and transform them to world coordinates
+    
+    %indices = zeros(nIR*dn,1);
+    indices = ((i-1)*6+1):(((i-1)+dn)*6);
+    
+    if (skipFrontRearIR == 1)
+        del_ind = [1:6:length(indices) 2:6:length(indices)];
+        indices(del_ind) = [];
     end
+    
+    %remove indices that point to NaN
+    indices(isnan(points(indices))==1) = [];
     
     %perform ransac on points until a minimum ratio of points is assigned
     nInliers = 0;
-    nPoints = size(points,2);
+    nPoints = size(indices,2);
     
     while( nInliers/nPoints < HALT_CONDITION )
         
-        iterNum = 10;
-        [~, ~, inliers] = ransac(points, iterNum, MAX_DIST_TO_HYPOTHESIS, MIN_NUM_OF_INLIERS/nPoints);
+        [t, r, inliers] = ransac(points, indices, RANSAC_ITERATIONS, MAX_DIST_TO_HYPOTHESIS, MIN_NUM_OF_INLIERS/nPoints);
         
         if (isempty(inliers))
             disp('Could not fit more lines into point set');
             break;
         end
         
+        plot(points(1,:),points(2,:),'ko');
+        hold on;
+        plot(points(1,indices),points(2,indices),'go');
+        plot(points(1,inliers),points(2,inliers),'ro');
+%         X = 0:0.1:2;%-N/20:N/20;
+%         k1 = -tan(t);
+%         b1 = r/cos(t);
+%         plot(X,k1*X+b1,'r');
+%         axis equal;
+        hold off;
+        pause;
+        
         nInliers = nInliers + length(inliers);
         
         %fill correspondences
-        for k=1:length(inliers)
-           [row col] = get_array_idx(inliers(k),nIR); 
+        for k=1:length(inliers) 
+           [row, col] = get_array_idx(inliers(k),6); 
            correspondences(col,row) = wallid;
         end
         
         wallid = wallid+1;
         
-        points(:,inliers) = [];
+        indices(ismember(indices,inliers)) = [];
         
     end
     
