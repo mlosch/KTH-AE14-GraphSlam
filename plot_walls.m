@@ -12,13 +12,13 @@ function plot_walls(poses, ir, correspondences, tf)
 	t = size(poses, 2);
 	
 	if isempty(correspondences)
-		correspondences = zeros(6, t)
+		correspondences = zeros(6, t);
 	elseif ~isequal(size(correspondences), [6 t])
 		error('is correspondances-matrix not transposed correctly?');
 	end
 	
-	clf
-	hold on
+	restore_hold_off = ~ishold;
+	hold on;
 
 	ir_points = tf.transform_to_map(poses, ir);
 	walls = fit_walls(poses, ir, correspondences, tf);
@@ -50,4 +50,7 @@ function plot_walls(poses, ir, correspondences, tf)
 	%poses
 	plot(poses(1,:), poses(2,:), 'or');
 	
+	if restore_hold_off
+		hold off;
+	end
 end

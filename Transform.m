@@ -26,7 +26,7 @@ classdef Transform
         end
         
         function m = pose_to_transform_mat(TF, pose)
-            R = rotate2d(pose(3));
+            R = rotate2d(-pose(3));
             m = [R, [pose(1);pose(2)]; [0 0 1]];
         end
         
