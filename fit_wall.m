@@ -2,7 +2,7 @@
 %
 % Input:        points              2xt
 %
-% Output:       wall                1x5     Wall coefficients in Hessian normal form [a,b,c, s,e]
+% Output:       wall                5x1     Wall coefficients in Hessian normal form [a,b,c, s,e]
 
 function wall = fit_wall(points)
 	bc = polyfit(points(1,:), points(2,:), 1);
@@ -14,7 +14,7 @@ function wall = fit_wall(points)
 	
 	wall = [-orth(2); %turn orth 90 degrees counter clockwise to get normal
 			orth(1);
-			bc(2);
+			bc(2)*orth(1);
 			min(proj_lengths);
 			max(proj_lengths)];
 end
