@@ -47,6 +47,7 @@ classdef Transform
 				poseTF = pose_to_transform_mat(TF, poses(:,i));
 				p = poseTF * irs_to_points(TF,ir_distances(:,i));
 				points(:, i*6-5:i*6) = p(1:2,:);
+
 			end
         end
 		
