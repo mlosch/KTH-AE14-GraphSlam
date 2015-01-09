@@ -12,11 +12,17 @@ global RANSAC_ITERATIONS; RANSAC_ITERATIONS = 50;
 
 %% Init
 disp('Reading poses and ir data');
-maze_data=readmatrixtable('data/dats/maze-940-980-classified.dat');
-startidx = 1;
-numPoses = 40;
+%maze_data=readmatrixtable('data/dats/maze-940-980-classified.dat');
+maze_data = readmatrixtable('data/dats/maze.dat');
+
+disp('Preparing data');
+startidx = 300;
+numPoses = 1000;
 poses = maze_data.pose(startidx:startidx+numPoses,:)';
 irs = maze_data.ir(startidx:startidx+numPoses,:)';
+
+%poses = maze_data.pose';
+%irs = maze_data.ir';
 
 %filter invalid ir readings
 irs(irs > 0.6 | irs <= 0.0) = NaN;
@@ -28,5 +34,7 @@ TF = Transform('data/tf.dat');
 
 disp('Segmenting walls');
 correspondences = segment_walls(TF, poses, irs, FRAME_LENGTH, 1);
+
+%%
 plot_walls(poses,irs,correspondences,TF)
 axis equal
