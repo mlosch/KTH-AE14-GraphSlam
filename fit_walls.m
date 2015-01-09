@@ -22,7 +22,8 @@ function walls = fit_walls(poses, ir, correspondences, tf)
 		corresponding_points = ir_points(:, correspondences == i);
 		
 		if isempty(corresponding_points)
-			error('no assigned points for class');
+			disp(sprintf('no assigned points for class %d',i));
+            continue;
 		end
 		walls(:,i) = fit_wall(corresponding_points);
 	end
