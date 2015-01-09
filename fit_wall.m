@@ -7,7 +7,7 @@
 function wall = fit_wall(points)
 	bc = polyfit(points(1,:), points(2,:), 1);
 	
-	orth = [bc(1) 1];
+	orth = [1 bc(1)];
 	orth = orth/norm(orth);
 	
 	proj_lengths = orth*points;
