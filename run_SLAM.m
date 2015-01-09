@@ -36,5 +36,5 @@ disp('Segmenting walls');
 correspondences = segment_walls(TF, poses, irs, FRAME_LENGTH, 1);
 
 %%
-plot_walls(poses,irs,correspondences,TF)
+plot_map(poses,irs,correspondences,TF)
 axis equal
