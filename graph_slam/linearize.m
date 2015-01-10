@@ -105,7 +105,7 @@ for t=1:T
         omega(indY,indX) = omega(indY,indX) + H_tp_omega(4:5,4:5);
         
         
-        H_tp_xi = H_tp * [ir_dist - z_hat - H * [poses(:,t) wall(1:2,1)]']; %line 19
+        H_tp_xi = H_tp * (ir_dist - z_hat - H * [poses(:,t) wall(1:2,1)]'); %line 19
         indY = oty(t,3,1);
         xi(indY,1) = xi(indY,1) + H_tp_xi(1:3,1);
         
