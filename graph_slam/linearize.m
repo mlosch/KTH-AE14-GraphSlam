@@ -1,4 +1,4 @@
-function [ omega, xi ] = linearize( poses, measurements, correspondences, walls, R, Q, TF )
+function [ omega, xi, tau ] = linearize( poses, measurements, correspondences, walls, R, Q, TF )
 %LINEARIZE
 % Inputs:       poses               3xt
 %               measurements        6xt 
@@ -11,6 +11,8 @@ function [ omega, xi ] = linearize( poses, measurements, correspondences, walls,
 %
 % Output:       omega               nxm     information matrix
 %               xi                  nxm     information vector
+%               tau                 Txm     Binary matrix that maps
+%               observed features to poses
 
 assert(isequal(poses(:,1), [0;0;0]),'Assertion failed at linearize(): First pose has to be [0 0 0]');
 
@@ -20,6 +22,7 @@ nWalls = max(max(correspondences));
 
 omega = zeros(3*T+2*nWalls);
 xi = zeros(3*T+2*nWalls,1);
+tau = logical(zeros(T,nWalls));
 
 omega(1:3,1:3) = eye(3)*inf;
 
@@ -69,6 +72,9 @@ for t=1:T
         
         %get wall feature j
         wall = walls(:,j);
+        
+        %add flag to tau
+        tau(t,j) = logical(1);
         
         %sensor offsets and angles
         ir_offsets = TF.ir_offsets(:,i);
