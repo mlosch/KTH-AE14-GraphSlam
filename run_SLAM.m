@@ -17,7 +17,7 @@ maze_data = readmatrixtable('data/dats/maze.dat');
 
 disp('Preparing data');
 startidx = 300;
-numPoses = 1000;
+numPoses = 100;
 poses = maze_data.pose(startidx:startidx+numPoses,:)';
 poses(1:2,:) = poses(1:2,:) - repmat(poses(1:2,1), [1 size(poses,2)]); %make poses start at (0,0,theta)
 %poses(3,:) = wrapToPi(poses(3,:)); 
@@ -36,12 +36,17 @@ TF = Transform('data/tf.dat');
 
 disp('Segmenting walls');
 correspondences = segment_walls(TF, poses, irs, FRAME_LENGTH, 1);
+figure;
+plot_map(poses,irs,correspondences,TF)
 
 %% Slamming
 
 disp('Graph Slamming');
-poses = graphSLAM(poses, irs, correspondences, R, Q, TF, 5);
+Q = .1*.1;
+R = diag([.1, .1, 3*pi/180].^2);
+corrected_poses = graphSLAM(poses, irs, correspondences, R, Q, TF, 5);
 
 %% Plotting
-plot_map(poses,irs,correspondences,TF)
+figure;
+plot_map(corrected_poses,irs,correspondences,TF)
 axis equal

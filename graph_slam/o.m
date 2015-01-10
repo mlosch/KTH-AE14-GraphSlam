@@ -8,7 +8,10 @@
 %           list of row and column indices
 function [ys, xs] = o(t, j, n, m)
 
+    if j==0
+        j = 0.5;
+    end
     a = t*3-2 + j*2-1;
-    ys = a:(a + n);
-    xs = a:(a + m);
+    ys = a:(a + n-1);
+    xs = a:(a + m-1);
 end

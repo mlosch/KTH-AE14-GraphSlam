@@ -21,8 +21,8 @@ function dh = observation_model_derivative(pose, wall, sensor_offsets, sensor_al
     N = wall(1,1);
     c = wall(2,1);
     
-    sx = offsets(1,1);
-    sy = offsets(2,1);
+    sx = sensor_offsets(1,1);
+    sy = sensor_offsets(2,1);
     stheta = sensor_alignment;
     
     cosTheta = cos(theta);

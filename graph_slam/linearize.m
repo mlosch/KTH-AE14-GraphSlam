@@ -14,9 +14,13 @@ function [ omega, xi, tau ] = linearize( poses, measurements, correspondences, w
 %               tau                 Txm     Binary matrix that maps
 %               observed features to poses
 
-assert(isequal(poses(:,1), [0;0;0]),'Assertion failed at linearize(): First pose has to be [0 0 0]');
+%assert(isequal(poses(:,1), [0;0;0]),'Assertion failed at linearize(): First pose has to be [0 0 0]');
 
 T = size(poses,2);
+
+x = @(i)     3*i-2 :     3*i;
+xc= @(i)     3*i-2 :     3*i+3;
+m = @(i) 3*T+2*i-1 : 3*T+2*i;
 
 nWalls = max(max(correspondences));
 
@@ -24,7 +28,7 @@ omega = zeros(3*T+2*nWalls);
 xi = zeros(3*T+2*nWalls,1);
 tau = false(T,nWalls);
 
-omega(1:3,1:3) = eye(3)*inf;
+omega(1:3,1:3) = diag([inf inf inf]);
 
 R_inv = inv(R);
 
@@ -49,11 +53,11 @@ for t=2:T
 %     omega(xt ,xt1) = omega(xt ,xt1) + M(1:3,4:6);
 %     omega(xt ,xt ) = omega(xt ,xt ) + M(4:6,4:6);
     
-    [indY, indX] = o(t-1,0,6,6);
-    omega(indY,indX) = omega(indY,indX) + M;
+    ind = xc(t-1);
+    omega(ind,ind) = omega(ind,ind) + M;
     
     K = [eye(3); -G_t] * R_inv * [x_hat_t + G_t*x_hat_t_1];
-    xi(indY,1) = xi(indY,1) + K;
+    xi(ind,1) = xi(ind,1) + K;
     
 end
 
@@ -82,7 +86,7 @@ for t=1:T
         
         ir_dist = measurements(i,t);
         
-        z_hat = observation_model(poses(:,t), wall, ir_dist, i, TF);
+        z_hat = observation_model(poses(:,t), wall, measurements(:,t), i, TF);
         
         %observation_model_derivative(pose,wall,sensor_offsets,sensor_alignment)
         H = observation_model_derivative(poses(:,t), wall, ir_offsets, ir_angle);
@@ -92,24 +96,27 @@ for t=1:T
         H_tp_omega = H_tp * H; %line 18
         
         %decompose H_tp_omega
-        [indY, indX] = o(t,0,3,3);
+        indY = x(t);
+        indX = indY;
         omega(indY,indX) = omega(indY,indX) + H_tp_omega(1:3,1:3);
         
-        [indY, ~] = o(T,j,2,3);
+        indY = m(j);
         omega(indY,indX) = omega(indY,indX) + H_tp_omega(4:5,1:3);
         
-        [~,indX] = o(T,j,3,2);
+        indY = x(t);
+        indX = m(j);
         omega(indY,indX) = omega(indY,indX) + H_tp_omega(1:3,4:5);
         
-        [indY,~] = o(t,0,2,2);
+        indY = m(j);
+        indX = indY;
         omega(indY,indX) = omega(indY,indX) + H_tp_omega(4:5,4:5);
         
         
-        H_tp_xi = H_tp * (ir_dist - z_hat - H * [poses(:,t) wall(1:2,1)]'); %line 19
-        [indY, ~] = o(t,0,3,1);
+        H_tp_xi = H_tp * (ir_dist - z_hat - H * [poses(:,t); wall(1:2,1)]); %line 19
+        indY = x(t);
         xi(indY,1) = xi(indY,1) + H_tp_xi(1:3,1);
         
-        [indY, ~] = o(T,j,2,1);
+        indY = m(j);
         xi(indY,1) = xi(indY,1) + H_tp_xi(4:5,1);
     end
     
