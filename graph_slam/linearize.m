@@ -12,8 +12,6 @@ function [ omega, xi ] = linearize( poses, measurements, correspondences, walls,
 % Output:       omega               nxm     information matrix
 %               xi                  nxm     information vector
 
-%TODO: Ensure first pose is (0,0,0)
-
 assert(isequal(poses(:,1), [0;0;0]),'Assertion failed at linearize(): First pose has to be [0 0 0]');
 
 T = size(poses,2);
