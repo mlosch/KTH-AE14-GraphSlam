@@ -22,7 +22,7 @@ nWalls = max(max(correspondences));
 
 omega = zeros(3*T+2*nWalls);
 xi = zeros(3*T+2*nWalls,1);
-tau = logical(zeros(T,nWalls));
+tau = false(T,nWalls);
 
 omega(1:3,1:3) = eye(3)*inf;
 
@@ -74,7 +74,7 @@ for t=1:T
         wall = walls(:,j);
         
         %add flag to tau
-        tau(t,j) = logical(1);
+        tau(t,j) = true;
         
         %sensor offsets and angles
         ir_offsets = TF.ir_offsets(:,i);
