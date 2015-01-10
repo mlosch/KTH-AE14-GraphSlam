@@ -37,6 +37,11 @@ TF = Transform('data/tf.dat');
 disp('Segmenting walls');
 correspondences = segment_walls(TF, poses, irs, FRAME_LENGTH, 1);
 
-%%
+%% Slamming
+
+disp('Graph Slamming');
+poses = graphSLAM(poses, irs, correspondences, R, Q, TF, 5);
+
+%% Plotting
 plot_map(poses,irs,correspondences,TF)
 axis equal
