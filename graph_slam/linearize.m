@@ -48,13 +48,10 @@ for t=2:T
 %     omega(xt ,xt1) = omega(xt ,xt1) + M(1:3,4:6);
 %     omega(xt ,xt ) = omega(xt ,xt ) + M(4:6,4:6);
     
-    indY = oty(t-1,6,6);
-    indX = otx(t-1,6,6);
+    [indY, indX] = o(t-1,0,6,6);
     omega(indY,indX) = omega(indY,indX) + M;
     
     K = [eye(3); -G_t] * R_inv * [x_hat_t + G_t*x_hat_t_1];
-    
-    indY = oty(t-1,6,1);
     xi(indY,1) = xi(indY,1) + K;
     
 end
@@ -91,52 +88,27 @@ for t=1:T
         H_tp_omega = H_tp * H; %line 18
         
         %decompose H_tp_omega
-        indY = oty(t,3,3);
-        indX = otx(t,3,3);
+        [indY, indX] = o(t,0,3,3);
         omega(indY,indX) = omega(indY,indX) + H_tp_omega(1:3,1:3);
         
-        indY = omy(j,T,2,3);
+        [indY, ~] = o(T,j,2,3);
         omega(indY,indX) = omega(indY,indX) + H_tp_omega(4:5,1:3);
         
-        indX = omx(j,T,3,2);
+        [~,indX] = o(T,j,3,2);
         omega(indY,indX) = omega(indY,indX) + H_tp_omega(1:3,4:5);
         
-        indY = oty(t,2,2);
+        [indY,~] = o(t,0,2,2);
         omega(indY,indX) = omega(indY,indX) + H_tp_omega(4:5,4:5);
         
         
         H_tp_xi = H_tp * (ir_dist - z_hat - H * [poses(:,t) wall(1:2,1)]'); %line 19
-        indY = oty(t,3,1);
+        [indY, ~] = o(t,0,3,1);
         xi(indY,1) = xi(indY,1) + H_tp_xi(1:3,1);
         
-        indY = omy(j,T,2,1);
+        [indY, ~] = o(T,j,2,1);
         xi(indY,1) = xi(indY,1) + H_tp_xi(4:5,1);
     end
     
 end
 
-end
-
-%returns indices for poses
-function idx = oty(t, n,m)
-    %idx = t*3-(n-1):t*3;
-    a = t*3-2;
-    idx = a:(a + n);
-end
-
-function idx = otx(t, n,m)
-    %idx = t*3-(m-1):t*3;
-    a = t*3-2;
-    idx = a:(a + m);
-end
-
-%returns indices for features
-function idx = omy(j, T,n,m)
-    a = (T*3-2 + j*2-1);
-    idx = a:(a+n);
-end
-
-function idx = omx(j, T,n,m)
-    a = (T*3-2 + j*2-1);
-    idx = a:(a+m);
 end
