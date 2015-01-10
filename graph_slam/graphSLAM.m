@@ -27,17 +27,17 @@ function poses = graphSLAM( poses, measurements, correspondences, R, Q, TF, maxI
         %omega(1:3,1:3) = omega(1:3,1:3) + eye(3);
         omega = (omega + omega')/2;
         
-        hasNans = sum(find(omega~=omega))
+        fprintf('NaN count: %d\n', sum(find(omega~=omega)));
         
         HS=sparse(omega);
         deltax = HS\xi;
         
         poses = poses + reshape(deltax(1:3*T), 3, T);
         
-        err = sum(sum(abs(deltax)));
-        fprintf('Error: %lf\n',err);
+        change = sum(sum(abs(deltax)));
+        fprintf('Improvement: %f \n', change);
         
-        if err < 1e-6
+        if change < 1e-6
             break;
         end
         
