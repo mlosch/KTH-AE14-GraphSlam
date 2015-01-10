@@ -8,6 +8,8 @@
 %                                           to the normal of the wall to the farthest fitted points
 
 function wall = fit_wall(points)
+    warning('off','MATLAB:polyfit:RepeatedPointsOrRescale');
+
 	pointst = [points(2,:)
 	           points(1,:)];
 	
