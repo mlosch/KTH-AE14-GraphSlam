@@ -19,7 +19,8 @@
 function h = observation_model(pose, wall, ir_distances, index, tf)
 	points = tf.irs_to_points(ir_distances);
 	p = points(1:2,index);
-	wall_angle = atan2(wall(2), wall(1));
+    N = wall(1);
+    theta = pose(3);
 	
-	h = (dot(p, wall(1:2)) + wall(3)) / cos(abs(wall_angle - pose(3)));
+	h = (dot(p, [cos(N), sin(N)]) - wall(2)) / cos(N - theta);
 end
