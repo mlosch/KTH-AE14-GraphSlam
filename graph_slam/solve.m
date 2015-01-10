@@ -1,4 +1,4 @@
-function [ means, covariances ] = solve( omega_reduced, xi_reduced, omega, xi, tau )
+function means = solve( omega_reduced, xi_reduced, omega, xi, tau )
 %solve
 %
 % Inputs:   omega_reduced
@@ -8,10 +8,9 @@ function [ means, covariances ] = solve( omega_reduced, xi_reduced, omega, xi, t
 %           tau             Txm
 %
 % Outputs:  means           Corrected poses
-%           covariances     Covariance matrices of corrected poses
 
 T = size(xi_reduces,1);
-covariances = zeros(3,3,T);
+%covariances = zeros(3,3,T);
 means = zeros(3,T);
 
 %assumes dimension of 2 per feature
@@ -19,8 +18,7 @@ nFeatures = (size(omega,1) - size(omega_reduced,1))/2;
 
 for t=1:T
     [idxY, idxX] = o(t,0,3,3);
-    covariances(:,:,t) = inv(omega_reduced(idxY,idxX));
-    means(:,t) = covariances(:,:,t) * xi_reduced(idxY,1);
+    means(:,t) = omega_reduced(idxY,idxX) \ xi_reduced(idxY,1);
 end
 
 pose_indices = 1:T;
