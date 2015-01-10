@@ -2,13 +2,19 @@
 import sys
 import tf
 import rosbag
-import math
+from math import sin, cos, pi
 
 def anglediff(a,b):
-	return (b-a+math.pi) % (2*math.pi) - math.pi
+	return (b-a+pi) % (2*pi) - pi
 
 def posediff(a,b):
-	return (b[0]-a[0], b[1]-a[1], anglediff(a[2],b[2]))
+	dx = b[0]-a[0]
+	dy = b[1]-a[1]
+	dt = anglediff(a[2],b[2])
+	t = b[2] #(a[2]+b[2])/2
+	c = cos(t)
+	s = sin(t)
+	return (c*dx + s*dy, -s*dx + c*dy, dt)
 
 def msg2pose(msg):
 	pose = msg.pose.pose
@@ -28,16 +34,19 @@ if len(sys.argv) < 2:
 
 
 
-print 'pose,ir'
+print 'delta_pose,ir'
 
 pose = False
+prev_pose = False
 
 bag = rosbag.Bag(sys.argv[1])
 for topic, msg, t in bag.read_messages(topics=['/sensors/pose', '/sensors/ir/distances']):
 	if topic == '/sensors/pose':
 		pose = msg2pose(msg)
 	elif topic == '/sensors/ir/distances':
-		if pose != False:
+		if prev_pose != False:
+			delta_pose = posediff(prev_pose, pose)
 			dist = msg2dist(msg)
-			print '[%9.6f %9.6f %9.6f],\t[%6.3f %6.3f %6.3f %6.3f %6.3f %6.3f]' % (pose + dist)
+			print '[%9.6f %9.6f %9.6f],\t[%6.3f %6.3f %6.3f %6.3f %6.3f %6.3f]' % (delta_pose + dist)
+		prev_pose = pose
 bag.close()

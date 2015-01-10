@@ -12,22 +12,13 @@ global RANSAC_ITERATIONS; RANSAC_ITERATIONS = 50;
 
 %% Init
 disp('Reading poses and ir data');
-%maze_data=readmatrixtable('data/dats/maze-940-980-classified.dat');
-maze_data = readmatrixtable('data/dats/maze.dat');
 
-disp('Preparing data');
-startidx = 300;
-numPoses = 100;
-poses = maze_data.pose(startidx:startidx+numPoses,:)';
-poses(1:2,:) = poses(1:2,:) - repmat(poses(1:2,1), [1 size(poses,2)]); %make poses start at (0,0,theta)
-%poses(3,:) = wrapToPi(poses(3,:)); 
-irs = maze_data.ir(startidx:startidx+numPoses,:)';
+%map = readmatrixtable('data/dats/maze-940-980-classified.dat');
+map = readmatrixtable('data/dats/maze.dat');
+map = map(300:400, :);
 
-%poses = maze_data.pose';
-%irs = maze_data.ir';
-
-%filter invalid ir readings
-irs(irs > 0.6 | irs <= 0.0) = NaN;
+poses = integrate_poses(map.delta_pose');
+irs = filter_invalid_irs(map.ir');
 
 disp('Instantiating Transform class');
 TF = Transform('data/tf.dat');

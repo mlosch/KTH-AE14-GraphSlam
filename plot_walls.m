@@ -1,6 +1,7 @@
-% Plots walls on 
+% Plots all the walls
 %
 % Input:        walls               4xT         Wall coefficients in something like Hessian normal form [Nu,c, s,e]
+%               ...                             Arguments to pass on to the plot call for each line
 
 function plot_walls(walls, varargin)
 	restore_hold_off = ~ishold;

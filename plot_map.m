@@ -13,7 +13,7 @@ function plot_map(poses, ir, correspondences, tf)
 		correspondences = zeros(6, t);
 	end
 	
-	assert(isequal(size(correspondences), [6 t]), 'is correspondances-matrix not transposed correctly?');
+	assert(isequal(size(correspondences), [6 t]), 'is correspondances-matrix transposed correctly?');
 	
 	restore_hold_off = ~ishold;
 	hold on;
