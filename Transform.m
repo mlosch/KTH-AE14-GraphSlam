@@ -1,11 +1,14 @@
 % class for transforming ir distance readings into points relative a pose
 
 classdef Transform
+
     properties (SetAccess = private)
-		ir_offsets
     end
     
     properties
+        ir_offsets
+        ir_angles
+        
         front = 1
         rear = 2
         left_front = 3
@@ -22,6 +25,8 @@ classdef Transform
             
 			TF.ir_offsets = repmat([0 0 1]', [1 n]);
 			TF.ir_offsets(1:2,:) = data.xyz(:,1:2)';
+            
+            TF.ir_angles = data.rpy(:,3)';
         end
         
         function m = pose_to_transform_mat(TF, pose)

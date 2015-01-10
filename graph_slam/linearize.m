@@ -1,11 +1,12 @@
-function [ omega, xi ] = linearize( poses, measurements, correspondences, R, Q, TF )
+function [ omega, xi ] = linearize( poses, measurements, correspondences, walls, R, Q, TF )
 %LINEARIZE
 % Inputs:       poses               3xt
-%               measurements        2x6xt 
-%                                   (e.g. 6 measurements [range, bearing] at timestep t)%                                   
-%               correspondences     6xt     correspondence per measurement
+%               measurements        6xt 
+%                                   (e.g. 6 range measurements per timestep)
+%               correspondences     6xt     correspondence to wall per measurement
+%               walls               4xn     of type [Nu, c, start, end]
 %               R                   3x3     Process noise
-%               Q                   2x2     Measurement noise
+%               Q                   1x1     Measurement noise
 %               TF                  Transform
 %
 % Output:       omega               nxm     information matrix
@@ -13,13 +14,16 @@ function [ omega, xi ] = linearize( poses, measurements, correspondences, R, Q, 
 
 %TODO: Ensure first pose is (0,0,0)
 
+assert(isequal(poses(:,1), [0;0;0]),'Assertion failed at linearize(): First pose has to be [0 0 0]');
+
 T = size(poses,2);
 
-omega = zeros(4,4,T);
-xi = zeros(4,T);
+nWalls = max(max(correspondences));
 
-omega(1,:,:) = eye(4)*inf;
-omega(1,4,4) = 0;
+omega = zeros(3*T+2*nWalls);
+xi = zeros(3*T+2*nWalls,1);
+
+omega(1:3,1:3) = eye(3)*inf;
 
 R_inv = inv(R);
 
@@ -37,13 +41,25 @@ for t=2:T
     G_t(1,3) = -ds * sin(theta_t_1);
     G_t(2,3) = ds * cos(theta_t_1);
     
-    M = [ones(1,4); -G_t] * R_inv * [ones(4,1) -G_t];
-    omega(t,:,:) = omega(t,:,:) + M;
-    omega(t-1,:,:) = omega(t-1,:,:) + M;
+    M = [eye(3); -G_t] * R_inv * [eye(3), -G_t];
+    
+%     omega(xt1,xt1) = omega(xt1,xt1) + M(1:3,1:3);
+%     omega(xt1,xt ) = omega(xt1,xt ) + M(4:6,1:3);
+%     omega(xt ,xt1) = omega(xt ,xt1) + M(1:3,4:6);
+%     omega(xt ,xt ) = omega(xt ,xt ) + M(4:6,4:6);
+    
+    indY = oty(t-1,6,6);
+    indX = otx(t-1,6,6);
+    omega(indY,indX) = omega(indY,indX) + M;
+    
+    K = [eye(3); -G_t] * R_inv * [x_hat_t + G_t*x_hat_t_1];
+    
+    indY = oty(t-1,6,1);
+    xi(indY,1) = xi(indY,1) + K;
     
 end
 
-Q_inv = inv(Q);
+Q_inv = 1/Q;
 %measurements
 for t=1:T
     
@@ -54,28 +70,73 @@ for t=1:T
         
         j = correspondences(i,t);
         
-        if (j == -1) continue; end;
+        if (j <= 0) continue; end;
         
-        dist    = measurements(1,i,t);
-        bearing = measurements(2,i,t);
+        %get wall feature j
+        wall = walls(:,j);
         
-        %determine delta
-        point = poseTF * [cos(bearing)*dist; sin(bearing)*dist; 1];
-        delta = point(1:2);
+        %sensor offsets and angles
+        ir_offsets = TF.ir_offsets(:,i);
+        ir_angle = TF.ir_angles(1,i);
         
-        z_hat = [dist; atan2(delta(2),delta(1)) - poses(3,t)];
-        %TODO: Wrap second comp to -pi,pi
+        ir_dist = measurements(i,t);
         
-        H = [dist*delta(1) -dist*delta(2)   0   -dist*delta(1)  dist*delta(2); ...
-            delta(2)        delta(1)        -1  -delta(2)       -delta(1)];
-        H = H/(dist*dist);
+        z_hat = observation_model(poses(:,t), wall, ir_dist, i, TF);
+        
+        %observation_model_derivative(pose,wall,sensor_offsets,sensor_alignment)
+        H = observation_model_derivative(poses(:,t), wall, ir_offsets, ir_angle);
         
         H_tp = H' * Q_inv;
         
-        H_tp_omega = H_tp * H;
-        omega(t,:,:) = H_tp_omega;
+        H_tp_omega = H_tp * H; %line 18
+        
+        %decompose H_tp_omega
+        indY = oty(t,3,3);
+        indX = otx(t,3,3);
+        omega(indY,indX) = omega(indY,indX) + H_tp_omega(1:3,1:3);
+        
+        indY = omy(j,T,2,3);
+        omega(indY,indX) = omega(indY,indX) + H_tp_omega(4:5,1:3);
+        
+        indX = omx(j,T,3,2);
+        omega(indY,indX) = omega(indY,indX) + H_tp_omega(1:3,4:5);
+        
+        indY = oty(t,2,2);
+        omega(indY,indX) = omega(indY,indX) + H_tp_omega(4:5,4:5);
+        
+        
+        H_tp_xi = H_tp * [ir_dist - z_hat - H * [poses(:,t) wall(1:2,1)]']; %line 19
+        indY = oty(t,3,1);
+        xi(indY,1) = xi(indY,1) + H_tp_xi(1:3,1);
+        
+        indY = omy(j,T,2,1);
+        xi(indY,1) = xi(indY,1) + H_tp_xi(4:5,1);
     end
     
 end
 
+end
+
+%returns indices for poses
+function idx = oty(t, n,m)
+    %idx = t*3-(n-1):t*3;
+    a = t*3-2;
+    idx = a:(a + n);
+end
+
+function idx = otx(t, n,m)
+    %idx = t*3-(m-1):t*3;
+    a = t*3-2;
+    idx = a:(a + m);
+end
+
+%returns indices for features
+function idx = omy(j, T,n,m)
+    a = (T*3-2 + j*2-1);
+    idx = a:(a+n);
+end
+
+function idx = omx(j, T,n,m)
+    a = (T*3-2 + j*2-1);
+    idx = a:(a+m);
 end
