@@ -22,5 +22,4 @@ function h = observation_model(pose, wall, ir_distances, index, tf)
 	wall_angle = atan2(wall(2), wall(1));
 	
 	h = (dot(p, wall(1:2)) + wall(3)) / cos(abs(wall_angle - pose(3)));
-	
 end
