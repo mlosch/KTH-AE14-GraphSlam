@@ -6,16 +6,14 @@
 %               correspondences     6xt         The ir measurements assigned wall IDs
 %               tf                  Transform   For transforming ir distances to world space
 
-
-
 function plot_map(poses, ir, correspondences, tf)
 	t = size(poses, 2);
 	
 	if isempty(correspondences)
 		correspondences = zeros(6, t);
-	elseif ~isequal(size(correspondences), [6 t])
-		error('is correspondances-matrix not transposed correctly?');
 	end
+	
+	assert(isequal(size(correspondences), [6 t]), 'is correspondances-matrix not transposed correctly?');
 	
 	restore_hold_off = ~ishold;
 	hold on;
@@ -27,8 +25,9 @@ function plot_map(poses, ir, correspondences, tf)
 	for i=1:size(walls,2)
 		wall=walls(:,i);
 		corr_ir_points = ir_points(:,correspondences == i);
-		
-		proj = corr_ir_points - wall(1:2) * (wall(1:2)'*corr_ir_points - wall(3));
+		wall_normal = [cos(wall(1))
+		               sin(wall(1))];
+		proj = corr_ir_points - wall_normal * (wall_normal'*corr_ir_points - wall(2));
 		for j=1:size(corr_ir_points,2)
 			plot([corr_ir_points(1,j) proj(1,j)], [corr_ir_points(2,j) proj(2,j)], '-g');
 		end

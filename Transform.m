@@ -1,7 +1,6 @@
+% class for transforming ir distance readings into points relative a pose
+
 classdef Transform
-    %UNTITLED Summary of this class goes here
-    %   Detailed explanation goes here
-    
     properties (SetAccess = private)
 		ir_offsets
     end
@@ -50,8 +49,5 @@ classdef Transform
 
 			end
         end
-		
     end
-    
 end
-

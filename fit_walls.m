@@ -6,16 +6,14 @@
 %               correspondences     6xt         The ir measurements assigned wall IDs
 %               tf                  Transform   For transforming ir distances to world space
 %
-% Output:       walls               5xs         Wall coefficients in Hessian normal form [a,b,c, s,e]
+% Output:       walls               4xs         Wall coefficients in something like Hessian normal form [Nu,c, s,e]
 %                                               s is given by the maximum wall ID in correspondences
-
-
 
 function walls = fit_walls(poses, ir, correspondences, tf)
 	t = size(poses, 2);
 	
 	wallc = max(max(correspondences));
-	walls = zeros(5, wallc);
+	walls = zeros(4, wallc);
 	
 	ir_points = tf.transform_to_map(poses, ir);
 	for i = 1:wallc

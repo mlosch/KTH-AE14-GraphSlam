@@ -1,3 +1,6 @@
+% An adaptation of the standard readtable() that reads matrices of
+% numbers as expected, instead of as strings.
+
 function t = readmatrixtable(table_name, varargin)
 
 	t = readtable(table_name, varargin{1:end});

@@ -19,6 +19,8 @@ disp('Preparing data');
 startidx = 300;
 numPoses = 1000;
 poses = maze_data.pose(startidx:startidx+numPoses,:)';
+poses(1:2,:) = poses(1:2,:) - repmat(poses(1:2,1), [1 size(poses,2)]); %make poses start at (0,0,theta)
+%poses(3,:) = wrapToPi(poses(3,:)); 
 irs = maze_data.ir(startidx:startidx+numPoses,:)';
 
 %poses = maze_data.pose';
