@@ -19,7 +19,7 @@ function [omega_, xi_] = reduce(omega, xi, tau, T)
 	for j=1:wallc
 		for t=find(tau(:,j))
 			omega_tj = omega_(x(t),m(j));
-			omega_jj = omega_(m(j),m(j)) ^ -1;
+			omega_jj = inv(omega_(m(j),m(j)));
 			omega_jt = omega_(m(j),x(t));
 			xi_j     =     xi(m(j));
 			

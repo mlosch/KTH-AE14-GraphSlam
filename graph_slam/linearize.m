@@ -1,6 +1,7 @@
-function [ omega, xi, tau ] = linearize( poses, measurements, correspondences, walls, R, Q, TF )
+function [ omega, xi, tau ] = linearize( poses, delta_poses, measurements, correspondences, walls, R, Q, TF )
 %LINEARIZE
 % Inputs:       poses               3xt
+%               delta_poses         3xt
 %               measurements        6xt 
 %                                   (e.g. 6 range measurements per timestep)
 %               correspondences     6xt     correspondence to wall per measurement
@@ -35,18 +36,32 @@ R_inv = inv(R);
 %dynamics
 for t=2:T
     
-    x_hat_t_1 = poses(:,t-1);
-    x_hat_t = poses(:,t);
+    mu_t_1 = poses(:,t-1);
+    %x_hat_t = mu_t_1 + delta_poses(:,t);
     
-    theta_t_1 = x_hat_t_1(3,1);
+    theta_t_1 = mu_t_1(3);
     
-    ds = norm(x_hat_t_1-x_hat_t);
+    ds = norm(delta_poses(1:2,t));
+    %ds = norm(poses(1:2,t-1)-poses(1:2,t));
+    
+    v_t = norm(delta_poses(1:2,t))/0.1;
+    w_t = delta_poses(3,t)/0.1;
+    w_t = w_t + 1e-15;
+    
+    x_hat_t = mu_t_1;
+    x_hat_t(1) = -v_t/w_t * sin(theta_t_1) + v_t/w_t * sin(theta_t_1 + w_t*0.1);
+    x_hat_t(2) = v_t/w_t * cos(theta_t_1) - v_t/w_t * cos(theta_t_1 + w_t*0.1);
+    x_hat_t(3) = w_t*0.1;
     
     G_t = eye(3);
-    G_t(1,3) = -ds * sin(theta_t_1);
-    G_t(2,3) = ds * cos(theta_t_1);
+    %G_t(1,3) = -delta_poses(2,t)/0.1;%-ds * sin(theta_t_1);
+    %G_t(2,3) = delta_poses(1,t)/0.1;%ds * cos(theta_t_1);
+    
+    G_t(1,3) = v_t/w_t * cos(theta_t_1) - v_t/w_t * cos(theta_t_1 + w_t*0.1);
+    G_t(2,3) = v_t/w_t * sin(theta_t_1) - v_t/w_t * sin(theta_t_1 + w_t*0.1);
     
     M = [eye(3); -G_t] * R_inv * [eye(3), -G_t];
+    %M = [-G_t; eye(3)] * R_inv * [-G_t, eye(3)];
     
 %     omega(xt1,xt1) = omega(xt1,xt1) + M(1:3,1:3);
 %     omega(xt1,xt ) = omega(xt1,xt ) + M(4:6,1:3);
@@ -56,14 +71,18 @@ for t=2:T
     ind = xc(t-1);
     omega(ind,ind) = omega(ind,ind) + M;
     
-    K = [eye(3); -G_t] * R_inv * [x_hat_t + G_t*x_hat_t_1];
+    K = [eye(3); -G_t] * R_inv * [x_hat_t + G_t*mu_t_1];
+    %K = [-G_t; eye(3)] * R_inv * [x_hat_t + G_t*mu_t_1];
     xi(ind,1) = xi(ind,1) + K;
     
 end
 
+%skip measurement innovations for now
+return;
+
 Q_inv = 1/Q;
 %measurements
-for t=1:T
+for t=2:T
     
     poseTF = TF.pose_to_transform_mat(poses(:,t));
     
