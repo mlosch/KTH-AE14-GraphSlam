@@ -55,7 +55,7 @@ Q = .1*.1;
 R = diag([.03, .03, 3*pi/180].^2);
 %R=R/100;
 figure;
-corrected_poses = graphSLAM(poses, delta_poses, irs, correspondences, R, Q, TF, 50);
+corrected_poses = graphSLAM(poses, delta_poses, irs, correspondences, R, Q, TF, 1);
 
 fprintf('(%.1f s)\n', toc);
 %% Plotting

@@ -40,24 +40,24 @@ function poses = graphSLAM( poses, delta_poses, measurements, correspondences, R
 %         poses = poses + reshape(deltax(1:3*T), 3, T);
        
 %Attempt 2:
-%         error = 0;
-%         for t=1:T
-%             ind = x(t);
-%             poses(:,t) = poses(:,t) + omega(ind,ind) \ xi(ind,1);
-%             
-%             error = error + sum(omega(ind,ind) \ xi(ind,1));
-%         end
-%         poses(3,:) = wrapToPi(poses(3,:));
+        error = 0;
+        for t=1:T
+            ind = x(t);
+            poses(:,t) = poses(:,t) + omega(ind,ind) \ xi(ind,1);
+            
+            error = error + sum(omega(ind,ind) \ xi(ind,1));
+        end
+        poses(3,:) = wrapToPi(poses(3,:));
         
 % %Attempt 3:
-        omega = omega(1:T*3,1:T*3);
-        xi = xi(1:T*3,1);
-        
-        HS = sparse(omega);
-        deltax = HS\xi;%conjgrad((HS+HS')/2, xi);
-        
-        poses = poses + reshape(deltax(1:3*T), 3, T);
-        poses(3,:) = wrapToPi(poses(3,:));
+%         omega = omega(1:T*3,1:T*3);
+%         xi = xi(1:T*3,1);
+%         
+%         HS = sparse(omega);
+%         deltax = HS\xi;%conjgrad((HS+HS')/2, xi);
+%         
+%         poses = poses + reshape(deltax(1:3*T), 3, T);
+%         poses(3,:) = wrapToPi(poses(3,:));
 
 %Error calculation:
 %        error = sum(sum(abs(deltax)));

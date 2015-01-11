@@ -37,28 +37,30 @@ R_inv = inv(R);
 for t=2:T
     
     mu_t_1 = poses(:,t-1);
-    %x_hat_t = mu_t_1 + delta_poses(:,t);
+    x_hat_t = mu_t_1 + delta_poses(:,t);
     
     theta_t_1 = mu_t_1(3);
     
     ds = norm(delta_poses(1:2,t));
     %ds = norm(poses(1:2,t-1)-poses(1:2,t));
     
-    v_t = norm(delta_poses(1:2,t))/0.1;
-    w_t = delta_poses(3,t)/0.1;
-    w_t = w_t + 1e-15;
-    
-    x_hat_t = mu_t_1;
-    x_hat_t(1) = -v_t/w_t * sin(theta_t_1) + v_t/w_t * sin(theta_t_1 + w_t*0.1);
-    x_hat_t(2) = v_t/w_t * cos(theta_t_1) - v_t/w_t * cos(theta_t_1 + w_t*0.1);
-    x_hat_t(3) = w_t*0.1;
+%     v_t = norm(delta_poses(1:2,t))/0.1;
+%     w_t = delta_poses(3,t)/0.1;
+%     w_t = w_t + 1e-15;
+
+% Method from line 5:
+%     x_hat_t = mu_t_1;
+%     x_hat_t(1) = -v_t/w_t * sin(theta_t_1) + v_t/w_t * sin(theta_t_1 + w_t*0.1);
+%     x_hat_t(2) = v_t/w_t * cos(theta_t_1) - v_t/w_t * cos(theta_t_1 + w_t*0.1);
+%     x_hat_t(3) = w_t*0.1;
     
     G_t = eye(3);
-    %G_t(1,3) = -delta_poses(2,t)/0.1;%-ds * sin(theta_t_1);
-    %G_t(2,3) = delta_poses(1,t)/0.1;%ds * cos(theta_t_1);
-    
-    G_t(1,3) = v_t/w_t * cos(theta_t_1) - v_t/w_t * cos(theta_t_1 + w_t*0.1);
-    G_t(2,3) = v_t/w_t * sin(theta_t_1) - v_t/w_t * sin(theta_t_1 + w_t*0.1);
+    G_t(1,3) = -delta_poses(2,t)/0.1;%-ds * sin(theta_t_1);
+    G_t(2,3) = delta_poses(1,t)/0.1;%ds * cos(theta_t_1);
+ 
+% Method from line 6:
+%    G_t(1,3) = v_t/w_t * cos(theta_t_1) - v_t/w_t * cos(theta_t_1 + w_t*0.1);
+%    G_t(2,3) = v_t/w_t * sin(theta_t_1) - v_t/w_t * sin(theta_t_1 + w_t*0.1);
     
     M = [eye(3); -G_t] * R_inv * [eye(3), -G_t];
     %M = [-G_t; eye(3)] * R_inv * [-G_t, eye(3)];
